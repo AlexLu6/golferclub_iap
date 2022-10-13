@@ -23,16 +23,39 @@
   <!-- iOS meta tags & icons -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="hello_world">
+  <meta name="apple-mobile-web-app-title" content="drawer_and_bottom_bar">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
 
-  <title>hello_world</title>
+  <title>drawer_and_bottom_bar</title>
   <link rel="manifest" href="manifest.json">
 </head>
 <body>
+
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+  <script>
+      // TODO: Add SDKs for Firebase products that you want to use
+      // https://firebase.google.com/docs/web/setup#available-libraries
+      console.info("Initializing firebase...")
+      // Your web app's Firebase configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyD26EyAImrDoOMn3o6FgmSQjlttxjqmS7U",
+        authDomain: "golferclub-fce89.firebaseapp.com",
+        projectId: "golferclub-fce89",
+        storageBucket: "golferclub-fce89.appspot.com",
+        messagingSenderId: "301278524425",
+        appId: "1:301278524425:web:0d38c4cb30ad60e24074d8",
+      };
+  
+      // Initialize Firebase
+      const app = firebase.initializeApp(firebaseConfig);
+      console.info("App is initialized", app)
+    </script>
+  
   <!-- This script installs service_worker.js to provide PWA functionality to
        application. For more information, see:
        https://developers.google.com/web/fundamentals/primers/service-workers -->

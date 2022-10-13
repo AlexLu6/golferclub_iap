@@ -1,6 +1,6 @@
 {
-    "name": "hello_world",
-    "short_name": "hello_world",
+    "name": "drawer_and_bottom_bar",
+    "short_name": "drawer_and_bottom_bar",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

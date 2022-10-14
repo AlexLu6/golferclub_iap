@@ -630,10 +630,11 @@ class _MyHomePageState extends State<MyHomePage> {
           userHandicap = (userHandicap / cnt) * 0.9;
           prefs!.setDouble('handicap', userHandicap);
         }
+        print(userHandicap);
         return ListTile(
           leading: CircleAvatar(child: Text(myScores[i]['total'].toString(), style: TextStyle(fontWeight: FontWeight.bold))), 
           title: Text(myScores[i]['date'] + ' ' + myScores[i]['course'], style: TextStyle(fontWeight: FontWeight.bold)), 
-          subtitle: Text(parRows.toString() + ': ' + scoreRow(myScores[i]['pars'], myScores[i]['scores']).toString())
+          subtitle: Text(parRows.toString() + '\n' + scoreRow(myScores[i]['pars'], myScores[i]['scores']).toString(), style: TextStyle(fontWeight: FontWeight.bold))
         );
       },
     );

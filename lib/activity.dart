@@ -358,7 +358,7 @@ class ShowActivityPage extends MaterialPageRoute<int> {
                           if (row['total'] != '') {
                             myScores.insert(0, {
                               'date': DateTime.now().toString().substring(0, 11),
-                              'course': activity.data()!['course'],
+                              'course': course['name'],
                               'scores': scores,
                               'total': int.parse(row['total']),
                               'handicap': _handicap > 0 ? _handicap : 0
@@ -885,8 +885,8 @@ class _NewScorePage extends MaterialPageRoute<bool> {
                             if (complete) {
                               myScores.insert(0, {
                                 'date': DateTime.now().toString().substring(0, 11),
-                                'course': course['name'] + (course['zones'].length > 2 ? '(${course['zones'][zone0]['name']}, ${course['zones'][zone1]['name']})' : ''),
-                                'pars': pars,
+                                'course': course['name'],// + (course['zones'].length > 2 ? '(${course['zones'][zone0]['name']}, ${course['zones'][zone1]['name']})' : ''),
+//                                'pars': pars,
                                 'scores': scores,
                                 'total': sum1 + sum2,
                                 'handicap': (sum1 + sum2) - tpars > 0 ? (sum1 + sum2) - tpars : 0

@@ -74,4 +74,6 @@ class LanguageZh extends Language {
   String get applicationSent => '申請已送出！';
   String get deleteGroup => '刪除群組';
   String get includeMyself => '加入自己';
+  String get leaveMessage => '留言';
+  String get yourMessage => '你的留言';
 }

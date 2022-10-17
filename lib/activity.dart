@@ -115,9 +115,9 @@ class ShowActivityPage extends MaterialPageRoute<int> {
           bool alreadyIn = false, scoreReady = false, scoreDone = false, isBackup = false;
           String uName = '';
           int uIdx = 0;
-          var rows = [];
 
           List buildRows() {
+            var rows = [];
             var oneRow = {};
             int idx = 0;
 
@@ -161,28 +161,19 @@ class ShowActivityPage extends MaterialPageRoute<int> {
             var scoreRows = [];
             int idx = 1;    
             for (var e in activity.data()!['golfers']) {
-              if ((e['scores'] as List).length > 0) {
-                int eg = 0, bd =0, par = 0, bg = 0, db = 0;
-                List pars = e['pars'] as List;              
+              if ((e['scores'] as List).isNotEmpty) {
                 List scores = e['scores'] as List;
-                for (var ii=0; ii < pars.length; ii++) {
-                  if (scores[ii] == pars[ii]) par++;
-                  else if (scores[ii] == pars[ii] + 1) bg++;
-                  else if (scores[ii] == pars[ii] + 2) db++;
-                  else if (scores[ii] == pars[ii] - 1) bd++;
-                  else if (scores[ii] == pars[ii] - 2) eg++;
-                }
                 String net = e['net'].toString();
                 scoreRows.add({
                   'rank': idx,
                   'total': e['total'],
                   'name': e['name'],
                   'net': net.substring(0, min(net.length, 5)),
-                  'EG' : eg,
-                  'BD' : bd,
-                  'PAR' : par,
-                  'BG' : bg,
-                  'DB' : db
+                  'EG' : scores[0],
+                  'BD' : scores[1],
+                  'PAR' : scores[2],
+                  'BG' : scores[3],
+                  'DB' : scores[4]
                 });
                 idx++;
               }
@@ -194,20 +185,19 @@ class ShowActivityPage extends MaterialPageRoute<int> {
           }
 
           bool teeOffPass = activity.data()!['teeOff'].compareTo(Timestamp.now()) < 0;
+          bool teeOffPass2 = activity.data()!['teeOff'].compareTo(Timestamp(Timestamp.now().seconds - 2 * 60 * 60, 0)) < 0;
           Map course = {};
           void updateScore() {
-            FirebaseFirestore.instance.collection('ClubActivities').doc(activity.id).get().then((value) {
-              var glist = value.get('golfers');
-              glist[uIdx]['pars'] = myScores[0]['pars'];
+              var glist = activity.data()!('golfers');
+//              glist[uIdx]['pars'] = myScores[0]['pars'];
               glist[uIdx]['scores'] = myScores[0]['scores'];
               glist[uIdx]['total'] = myScores[0]['total'];
               glist[uIdx]['net'] = myScores[0]['total'] - handicap;
               FirebaseFirestore.instance.collection('ClubActivities').doc(activity.id).update({
                 'golfers': glist
               }).whenComplete(() => Navigator.of(context).pop(0));
-            });           
-          }
-
+          };           
+          
           // prepare parameters
           int eidx = 0;
           for (var e in activity.data()!['golfers']) {
@@ -216,19 +206,44 @@ class ShowActivityPage extends MaterialPageRoute<int> {
               alreadyIn = true;
               isBackup = eidx >= (activity.data()!['max'] as int);
               uName = e['name'];
-              if (myActivities.indexOf(activity.id) < 0) {
+              if (myActivities.contains(activity.id)) {
                 myActivities.add(activity.id);
                 storeMyActivities();
               }
             }
-            if ((e['scores'] as List).length > 0) {
+            if ((e['scores'] as List).isNotEmpty) {
               scoreReady = true;
               if (e['uid'] as int == uId) 
                 scoreDone = true;              
             }
             eidx++;
           }
-
+          final _textFieldController = TextEditingController();
+          String _remarks = activity.data()!['remarks'];
+          Future<String?> chatInputDialog(BuildContext context) async {
+            return showDialog(
+                context: context,
+                builder: (context) {
+                  return AlertDialog(
+                    title: Text(Language.of(context).leaveMessage),
+                    content: TextField(
+                      controller: _textFieldController,
+                      decoration: InputDecoration(hintText: Language.of(context).yourMessage),
+                    ),
+                    actions: <Widget>[
+                      ElevatedButton(
+                        child: const Text("Cancel"),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                      ElevatedButton(
+                        child: const Text('OK'),
+                        onPressed: () =>
+                            Navigator.pop(context, _textFieldController.text),
+                      ),
+                    ],
+                  );
+                });
+          }
           return Scaffold(
               appBar: AppBar(title: Text(title), elevation: 1.0),
               body: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
@@ -236,7 +251,8 @@ class ShowActivityPage extends MaterialPageRoute<int> {
                   decoration: BoxDecoration(image: DecorationImage(image: NetworkImage(netPhoto), fit: BoxFit.cover)),
                   child: Column(crossAxisAlignment: CrossAxisAlignment.center, children: <Widget>[
                   const SizedBox(height: 10.0),
-                  Text(Language.of(context).teeOff + activity.data()!['teeOff'].toDate().toString().substring(0, 16) + ' ' + Language.of(context).fee + activity.data()!['fee'].toString(), style: TextStyle(fontSize: 20)),
+                  Text(Language.of(context).teeOff + activity.data()!['teeOff'].toDate().toString().substring(0, 16) + ' ' + 
+                       Language.of(context).fee + activity.data()!['fee'].toString(), style: TextStyle(fontSize: 20)),
                   const SizedBox(height: 10.0),
                   FutureBuilder(
                       future: courseBody(activity.data()!['cid'] as int),
@@ -269,7 +285,7 @@ class ShowActivityPage extends MaterialPageRoute<int> {
                       rows: buildRows(),
                     ))
                   ),
-                  Text(Language.of(context).actRemarks + activity.data()!['remarks']),
+//                  Text(Language.of(context).actRemarks + activity.data()!['remarks']),
                   const SizedBox(height: 4.0),
                   Visibility(
                     visible: ((activity.data()!['golfers'] as List).length > 4) && alreadyIn && !isBackup && !scoreReady,
@@ -277,7 +293,8 @@ class ShowActivityPage extends MaterialPageRoute<int> {
                       child: Text(Language.of(context).subGroup),
                       onPressed: () {
                         Navigator.push(context, SubGroupPage(activity, uId)).then((value) {
-                          if (value ?? false) Navigator.of(context).pop(0);
+                          if (value ?? false) 
+                            Navigator.of(context).pop(0);
                         });
                       }
                     )
@@ -307,25 +324,72 @@ class ShowActivityPage extends MaterialPageRoute<int> {
                       rows: buildScoreRows(),
                     ))
                   ),
-                  Visibility(
-                    visible: teeOffPass && alreadyIn && !isBackup && !scoreDone,
-                    child : ElevatedButton(
-                      child: Text(Language.of(context).enterScore),
-                      onPressed: () async {
-                          if ((course["zones"]).length > 2) {
-                            List zones = await selectZones(context, course);
-                            if (zones.isNotEmpty)
-                              Navigator.push(context, newScorePage(course, uName, zone0: zones[0], zone1: zones[1])).then((value) {
-                                if (value ?? false) updateScore();
-                              });
-                          } else {
-                            Navigator.push(context, newScorePage(course, uName)).then((value) {
-                              if (value ?? false) updateScore();
+                  Visibility(visible: teeOffPass2 && alreadyIn && !isBackup && !scoreDone,
+                      child: Flexible(child: Editable2(
+                        borderColor: Colors.black,
+                        tdStyle: const TextStyle(fontSize: 14),
+                        trHeight: 16,
+                        tdAlignment: TextAlign.center,
+                        thAlignment: TextAlign.center,
+                        columnRatio: 0.12,
+                        columns: [
+                          {'title': Language.of(context).total, 'index': 1, 'key': 'total', 'widthFactor': 0.15},
+                          {'title': Emoji.byName('eagle')!.char, 'index': 2, 'key': 'EG'},
+                          {'title': Emoji.byName('dove')!.char, 'index': 3, 'key': 'BD'},
+                          {'title': Emoji.byName('person golfing')!.char, 'index': 4, 'key': 'PAR'},
+                          {'title': Emoji.byName('index pointing up')!.char, 'index': 5, 'key': 'BG'},
+                          {'title': Emoji.byName('victory hand')!.char, 'index': 6, 'key': 'DB'},
+                          {'title': Emoji.byName('face exhaling')!.char, 'index': 7, 'key': 'MM'},
+                        ],
+                        rows: const [{'total': '', 'BD': '', 'PAR': '', 'BG': '', 'DB': '', 'EG': '', 'MM': ''}],
+                        showSaveIcon: true,
+                        saveIcon: Icons.save,
+                        saveIconColor: Colors.blue,
+                        onRowSaved: (row) {
+                          List<int> scores = [
+                            row['EG'] == '' ? 0 : int.parse(row['EG']),
+                            row['BD'] == '' ? 0 : int.parse(row['BD']),
+                            row['PAR'] == '' ? 0 : int.parse(row['PAR']),
+                            row['BG'] == '' ? 0 : int.parse(row['BG']),
+                            row['DB'] == '' ? 0 : int.parse(row['DB']),
+                            row['MM'] == '' ? 0 : int.parse(row['MM'])
+                          ];
+                          int _handicap = scores[3] - scores[1] + (scores[4] - scores[0]) * 2 + scores[5] * 3;
+                          if (row['total'] != '') {
+                            myScores.insert(0, {
+                              'date': DateTime.now().toString().substring(0, 11),
+                              'course': activity.data()!['course'],
+                              'scores': scores,
+                              'total': int.parse(row['total']),
+                              'handicap': _handicap > 0 ? _handicap : 0
                             });
+                            storeMyScores();
+                            updateScore();
+                            scoreDone = true;
                           }
-                      }
-                    )
+                        },
+                      ))),
+                  Visibility(
+                    visible: !teeOffPass2,
+                    child: TextFormField(
+                      key: Key(_remarks),
+                      showCursor: true,
+                      initialValue: _remarks,
+                      style: TextStyle(color: Colors.black),
+                      onTap: () async {
+                        var msg = await chatInputDialog(context);
+                        if (msg != null) {
+                          _remarks = activity.data()['remarks'] + '\n' + userName + ': ' + msg;
+                          FirebaseFirestore.instance.collection('ClubActivities').doc(activity.id).update({'remarks': _remarks})
+                          .then((value) => setState(() {}));
+                          // refresh this TextFormField
+                        }
+                      },
+                      maxLines: 5,
+                      readOnly: true,
+                      decoration: InputDecoration(labelText: Language.of(context).actRemarks,border: OutlineInputBorder()),)
                   ),
+                  const SizedBox(height: 4.0),
                   Visibility(
                     visible: !teeOffPass && alreadyIn,
                     child: ElevatedButton(

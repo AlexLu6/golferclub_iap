@@ -78,4 +78,6 @@ abstract class Language {
   String get applicationSent;
   String get deleteGroup;
   String get includeMyself;
+  String get leaveMessage;
+  String get yourMessage;
 }

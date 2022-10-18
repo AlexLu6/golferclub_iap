@@ -188,8 +188,7 @@ class ShowActivityPage extends MaterialPageRoute<int> {
           bool teeOffPass2 = activity.data()!['teeOff'].compareTo(Timestamp(Timestamp.now().seconds - 2 * 60 * 60, 0)) < 0;
           Map course = {};
           void updateScore() {
-              var glist = activity.data()!('golfers');
-//              glist[uIdx]['pars'] = myScores[0]['pars'];
+              List glist = activity.get('golfers');
               glist[uIdx]['scores'] = myScores[0]['scores'];
               glist[uIdx]['total'] = myScores[0]['total'];
               glist[uIdx]['net'] = myScores[0]['total'] - handicap;
@@ -347,12 +346,12 @@ class ShowActivityPage extends MaterialPageRoute<int> {
                         saveIconColor: Colors.blue,
                         onRowSaved: (row) {
                           List<int> scores = [
-                            row['EG'] == '' ? 0 : int.parse(row['EG']),
-                            row['BD'] == '' ? 0 : int.parse(row['BD']),
-                            row['PAR'] == '' ? 0 : int.parse(row['PAR']),
-                            row['BG'] == '' ? 0 : int.parse(row['BG']),
-                            row['DB'] == '' ? 0 : int.parse(row['DB']),
-                            row['MM'] == '' ? 0 : int.parse(row['MM'])
+                            row['EG'] == null ? 0 : int.parse(row['EG']),
+                            row['BD'] == null ? 0 : int.parse(row['BD']),
+                            row['PAR'] == null ? 0 : int.parse(row['PAR']),
+                            row['BG'] == null ? 0 : int.parse(row['BG']),
+                            row['DB'] == null ? 0 : int.parse(row['DB']),
+                            row['MM'] == null ? 0 : int.parse(row['MM'])
                           ];
                           int _handicap = scores[3] - scores[1] + (scores[4] - scores[0]) * 2 + scores[5] * 3;
                           if (row['total'] != '') {

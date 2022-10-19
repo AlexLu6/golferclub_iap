@@ -47,6 +47,10 @@
 	<string>This app needs access to location to find your nearest golf course.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string>This app needs access to location to find your nearest golf course.</string>
+	<key>NSCalendarsUsageDescription</key>
+	<string>This app will remind your golf activity when tee off time is up</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>This app need to use your photo as your avatar in the app</string>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
 </dict>

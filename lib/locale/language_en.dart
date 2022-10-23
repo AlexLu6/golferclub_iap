@@ -76,4 +76,6 @@ class LanguageEn extends Language {
   String get includeMyself => 'Include myself';
   String get leaveMessage => 'Leave a Message';
   String get yourMessage => 'Your Message';
+  String get deleteAccount => 'Delete My Account';
+  String get deleteSure => 'Are you sure to delete your account?';
 }

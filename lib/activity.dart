@@ -26,7 +26,7 @@ Widget activityBody() {
                 children: snapshot.data!.docs.map((doc) {
                 if ((doc.data()! as Map)["teeOff"] == null) {
                   return LinearProgressIndicator();
-                } else if (myActivities.indexOf(doc.id) < 0) {
+                } else if (!myActivities.contains(doc.id)) {
                   return SizedBox.shrink();
                 } else if ((doc.data()! as Map)["teeOff"].compareTo(deadline) < 0) {
                   myActivities.remove(doc.id);
@@ -601,7 +601,7 @@ class _EditActivityPage extends MaterialPageRoute<bool> {
               value.docs.forEach((result) {
                 var items = result.data();
                 int uid = items['uid'] as int;
-                if (blist.indexOf(uid) >= 0)
+                if (blist.contains(uid))
                   golfers.add(NameID(items['name'] + '(' + items['phone'] + ')', items['uid'] as int));
               });
             });

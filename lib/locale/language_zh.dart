@@ -76,4 +76,6 @@ class LanguageZh extends Language {
   String get includeMyself => '加入自己';
   String get leaveMessage => '留言';
   String get yourMessage => '你的留言';
+  String get deleteAccount => '移除帳號';
+  String get deleteSure => '確定要移除帳號?';
 }

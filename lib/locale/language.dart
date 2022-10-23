@@ -80,4 +80,6 @@ abstract class Language {
   String get includeMyself;
   String get leaveMessage;
   String get yourMessage;
+  String get deleteAccount;
+  String get deleteSure;
 }

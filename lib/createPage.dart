@@ -93,7 +93,7 @@ class _GroupActPage extends MaterialPageRoute<bool> {
     }
     int _gID = (groupDoc.data()! as Map)['gid'];
     String _gName = (groupDoc.data()! as Map)['Name'];
-    bool isManager = ((groupDoc.data()! as Map)['managers'] as List).indexOf(uID) >= 0;
+    bool isManager = ((groupDoc.data()! as Map)['managers'] as List).contains(uID);
     void doAddActivity() async {     
       FirebaseFirestore.instance.collection('ApplyQueue').where('gid', isEqualTo: _gID).where('response', isEqualTo: 'waiting').get().then((value) {
         value.docs.forEach((result) async {
@@ -130,7 +130,7 @@ class _GroupActPage extends MaterialPageRoute<bool> {
                   } else if ((doc.data()! as Map)["teeOff"].compareTo(deadline) < 0) {
                     FirebaseFirestore.instance.collection('ClubActivities').doc(doc.id).delete(); //anyone can delete outdated activity
                     return SizedBox.shrink();
-                  } else if ((doc.data()! as Map)["gid"] != _gID || myActivities.indexOf(doc.id) >= 0) {
+                  } else if ((doc.data()! as Map)["gid"] != _gID || myActivities.contains(doc.id)) {
                     return SizedBox.shrink();
                   } else {
                     String cName = '';
@@ -241,7 +241,7 @@ class _EditGroupPage extends MaterialPageRoute<bool> {
               value.docs.forEach((result) {
                 var items = result.data();
                 int uid = items['uid'] as int;
-                if ((blist.indexOf(uid) >= 0) && (((groupDoc.data()! as Map)['managers'] as List).indexOf(uid) < 0))
+                if ((blist.contains(uid)) && (!((groupDoc.data()! as Map)['managers'] as List).contains(uid)))
                   golfers.add(NameID(items['name'] + '(' + items['phone'] + ')', items['uid'] as int));
               });
             });

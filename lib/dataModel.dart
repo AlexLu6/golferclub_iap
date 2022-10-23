@@ -15,7 +15,7 @@ String userName = '', userPhone = '', expiredDate = '', theLocale ='';
 gendre userSex = gendre.Male;
 double userHandicap = initHandicap;
 var golferDoc;
-bool isExpired = false;
+bool isExpired = false, isGroupMan = false;
 
 class NameID {
   const NameID(this.name, this.id);
@@ -74,7 +74,7 @@ Future<bool> isMember(int gid, int uid) {
   return FirebaseFirestore.instance.collection('GolferClubs').where('gid', isEqualTo: gid).get().then((value) {
     value.docs.forEach((result) {
       var items = result.data();
-      res = (items['members'] as List).indexOf(uid) >= 0 ? true : false;
+      res = (items['members'] as List).contains(uid);
     });
     return res;
   });
@@ -125,7 +125,7 @@ Future<int> notMyActivities(int gid) {
   return FirebaseFirestore.instance.collection('ClubActivities').where('gid', isEqualTo: gid)
     .get().then((value) {
       value.docs.forEach((doc) {
-        if (myActivities.indexOf(doc.id) < 0)
+        if (!myActivities.contains(doc.id))
           res++;
       });
       return res;
@@ -149,7 +149,7 @@ Future<bool> isManager(int gid, int uid) {
   return FirebaseFirestore.instance.collection('GolferClubs').where('gid', isEqualTo: gid).get().then((value) {
     value.docs.forEach((result) {
       var items = result.data();
-      res = (items['managers'] as List).indexOf(uid) >= 0 ? true : false;
+      res = (items['managers'] as List).contains(uid);
     });
     return res;
   });

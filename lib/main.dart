@@ -210,6 +210,39 @@ class _MyHomePageState extends State<MyHomePage> {
                 });
                 Navigator.of(context).pop();
               }),
+          isExpired || isGroupMan ? SizedBox.shrink() :
+          ListTile(
+              title: Text(Language.of(context).deleteAccount),
+              leading: Icon(Icons.event_busy),
+              onTap: () {
+                showDialog<bool>(
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        title: Text(Language.of(context).deleteAccount),
+                        content: Text(Language.of(context).deleteSure),
+                        actions: <Widget>[
+                          TextButton(child: Text("Yes"), onPressed: () => Navigator.of(context).pop(true)),
+                          TextButton(child: Text("No"), onPressed: () => Navigator.of(context).pop(false))
+                        ],
+                      );
+                    }
+                ).then((value) {
+                  if (value!) {
+                    isRegistered = isUpdate = false;
+                    userName = '';
+                    userPhone = '';
+                    // Remove all activities
+                    myGroups.forEach((element) {
+                      removeMemberAllActivities(element as int, golferID);
+                      removeMember(element as int, golferID);
+                    });
+                    FirebaseFirestore.instance.collection('Golfers').doc(golferDoc).delete();
+                    setState(() => _currentPageIndex = 0);
+                  }
+                  Navigator.of(context).pop();
+                });
+              }),
           ListTile(
               title: Text(Language.of(context).usage),
               leading: Icon(Icons.help),
@@ -403,18 +436,20 @@ class _MyHomePageState extends State<MyHomePage> {
                   return const LinearProgressIndicator();
                 } else {
                    _gID = (doc.data()! as Map)["gid"] as int;
-                  if (((doc.data()! as Map)["members"] as List).indexOf(golferID) >= 0) {
-                    if (myGroups.indexOf(_gID) < 0) {
+                  if (((doc.data()! as Map)["members"] as List).contains(golferID)) {
+                    if (((doc.data()! as Map)["managers"] as List).contains(golferID))
+                      isGroupMan = true;
+                    if (!myGroups.contains(_gID)) {
                       myGroups.add(_gID);
                       storeMyGroup();
-                      FirebaseFirestore.instance.collection('ApplyQueue').where('uid', isEqualTo: golferID).where('gid', isEqualTo: _gID).get().then((value) {
+                      FirebaseFirestore.instance.collection('ApplyQueue').where('uid', isEqualTo: golferID).where('gid', isEqualTo: _gID).get()
+                      .then((value) {
                         value.docs.forEach((result) => FirebaseFirestore.instance.collection('ApplyQueue').doc(result.id).delete());
                       });
                     }
                   } /*else if ((doc.data()! as Map)['locale'] != theLocale)
                     return SizedBox(height: 1);*/
-                  return Card(
-                      child: ListTile(
+                  return Card(child: ListTile(
                     title: Text((doc.data()! as Map)["Name"], style: TextStyle(fontSize: 20)),
                     subtitle: FutureBuilder(
                         future: golferNames((doc.data()! as Map)["managers"] as List),
@@ -426,10 +461,10 @@ class _MyHomePageState extends State<MyHomePage> {
                         }),
                     leading: Image.network(groupPhoto),
                     /*Icon(Icons.group), */
-                    trailing: myGroups.indexOf(_gID) >= 0 ? Icon(Icons.keyboard_arrow_right) : Icon(Icons.no_accounts),
+                    trailing: myGroups.contains(_gID) ? Icon(Icons.keyboard_arrow_right) : Icon(Icons.no_accounts),
                     onTap: () async {
                       _gID = (doc.data()! as Map)["gid"] as int;
-                      if (myGroups.indexOf(_gID) >= 0) {
+                      if (myGroups.contains(_gID)) {
                         Navigator.push(context, groupActPage(doc, golferID, userName, userSex, userHandicap));
                       } else {
                         bool? apply = await showApplyDialog(await isApplying(_gID, golferID));
@@ -491,11 +526,12 @@ class _MyHomePageState extends State<MyHomePage> {
                       return const SizedBox.shrink();
                     } else {
                       _gID = (doc.data()! as Map)["gid"] as int;
-                      if (((doc.data()! as Map)["members"] as List).indexOf(golferID) < 0) {
+                      if (!((doc.data()! as Map)["members"] as List).contains(golferID)) {
                         myGroups.remove(_gID);
                         storeMyGroup();
                         return const LinearProgressIndicator();
-                      }
+                      } else if (((doc.data()! as Map)["managers"] as List).contains(golferID))
+                        isGroupMan = true;
                       return Card(
                         child: ListTile(
                         title: Text((doc.data()! as Map)["Name"], style: TextStyle(fontSize: 20)),
@@ -529,7 +565,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         },
                         onLongPress: () {
                           _gID = (doc.data()! as Map)["gid"] as int;
-                          if (((doc.data()! as Map)["managers"] as List).indexOf(golferID) >= 0) {
+                          if (((doc.data()! as Map)["managers"] as List).contains(golferID)) {
                             Navigator.push(context, editGroupPage(doc, golferID));
                           } else {
                             showDialog<bool>(
